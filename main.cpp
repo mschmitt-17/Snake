@@ -75,13 +75,13 @@ int main() {
     int player_input; //variable for player's input (arrow keys)
     int high_score = 0;
     int max_x = 0, max_y = 0;
+    FILE* in_file = fopen("high_score.txt", "r");
+    fscanf(in_file, "%d", &high_score);
+    fclose(in_file);
     Game *game = newGame(); //create new game
     getmaxyx(stdscr, max_y, max_x);
     while (!game_over) {
         game->render();
-        if (game->getLength() > high_score) {
-            high_score = game->getLength();
-        }
         mvprintw(max_y - 1, max_x - 15, "High Score: %d", high_score);
         refresh();
         Snake *snake = game->getSnake();
@@ -110,6 +110,12 @@ int main() {
         }
         tuple<int, int> new_position(get<0>(snake->getHead()) + get<0>(snake->getDirection()), get<1>(snake->getHead()) + get<1>(snake->getDirection())); //determine new position for snake's head
         if ((get<0>(new_position) < 0 || get<1>(new_position) < 0 || get<0>(new_position) >= game->getHeight() || get<1>(new_position) >= game->getWidth()) || snake->getDead()) { //if new position is out of bounds or snake has collided with itself, game over
+            if (game->getLength() > high_score) {
+                high_score = game->getLength();
+                FILE* out_file = fopen("high_score.txt", "w");
+                fprintf(out_file, "%d", high_score);
+                fclose(out_file);
+            }
             char playAgain; //variable to determine whether player wants to play again or quit
             curs_set(TRUE); //
             echo();         //--->turn cursor and echo back on for user input, turn timeout off so user input is needed to advance
